@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -29,9 +29,8 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
-    
+
     return Scaffold(
-      
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add_a_photo),
         onPressed: () {
@@ -144,21 +143,22 @@ class _HomeState extends State<Home> {
   }
 
   Future uploadFile() async {
-    StorageReference storageReference = FirebaseStorage.instance
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
         .ref()
         .child('images/${Path.basename(_image.path)}');
 
-    StorageUploadTask uploadTask = storageReference.putFile(_image);
-    await uploadTask.onComplete;
-    print('file uploaded');
+    firebase_storage.UploadTask task = ref.putFile(_image);
 
-    storageReference.getDownloadURL().then((fileURL) {
-      setState(() {
-        _uploadFileURL = fileURL;
+    task.whenComplete(() async {
+      print('file uploaded');
+      await ref.getDownloadURL().then((fileURL) {
+        setState(() {
+          _uploadFileURL = fileURL;
+        });
+      }).whenComplete(() async {
+        await imgColRef.add({'url': _uploadFileURL});
+        print('link added to database');
       });
-    }).whenComplete(() async {
-      await imgColRef.add({'url': _uploadFileURL});
-      print('link added to database');
     });
   }
 }

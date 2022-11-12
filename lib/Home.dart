@@ -35,8 +35,7 @@ class _HomeState extends State<Home> {
         child: Icon(Icons.add_a_photo),
         onPressed: () {
           chooseImage().whenComplete(() => showDialog(
-              context: context,
-              child: AlertDialog(
+              builder: (context) => AlertDialog(
                 title: Text('Confirm Upload ?'),
                 content: Container(
                   height: MediaQuery.of(context).size.height / 3,
@@ -46,19 +45,19 @@ class _HomeState extends State<Home> {
                           image: AssetImage(_image.path), fit: BoxFit.cover)),
                 ),
                 actions: [
-                  FlatButton(
+                  TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
                       child: Text('Cancel')),
-                  FlatButton(
+                  TextButton(
                       onPressed: () {
                         uploadFile();
                         Navigator.of(context).pop();
                       },
                       child: Text('Confirm'))
                 ],
-              )));
+              ), context: context));
         },
       ),
       body: Container(
